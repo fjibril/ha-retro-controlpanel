@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "start:hass",
+			"problemMatcher": [
+				"$jshint"
+			],
+			"label": "npm: start:hass",
+			"detail": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:beta"
+		}
+	]
+}
