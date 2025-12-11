@@ -50,8 +50,9 @@ export class FlipSwitch extends LitElement {
       aria-pressed="${stateStr === 'on'}"
       title="Toggle ${entityId}"
     >
+      <div class="status-light ${classMap({ inactive: stateStr !== 'on' })}"></div>
       <div class="image-wrap"><img src="${stateStr === 'on' ? onImg : offImg}" alt="Flip Switch"></div>
-      <div class="status-light ${classMap({inactive: stateStr !== 'on'})}"></div>
+
 
     </div>
   `;
@@ -81,10 +82,13 @@ export class FlipSwitch extends LitElement {
   static styles = css`
     .flip-switch {
       display: flex;
-      flex-direction: column;
-      justify-content: center;
+      /* place status light to the left of the switch and spread items evenly */
+      flex-direction: row;
       align-items: center;
+      justify-content: center;
       width: 100%;
+      /* give a little padding so the contents don't touch container bounds */
+      padding: 0.5em;
       /* allow the container to shrink if parent is smaller */
       max-width: 100%;
       box-sizing: border-box;
@@ -95,7 +99,7 @@ export class FlipSwitch extends LitElement {
       min-width: 0;
       min-height: 0;
       cursor: pointer;
-      gap: 0.375em;
+      gap: 1em;
     }
 
     .flip-switch img {
@@ -114,19 +118,23 @@ export class FlipSwitch extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 100%;
-      /* keep the image area constrained so it can shrink */
-      max-width: 100%;
+      /* don't let the image area stretch to fill the whole row; allow it
+         to size to the intrinsic image while remaining responsive */
+      width: auto;
+      max-width: 65%;
       box-sizing: border-box;
-      flex: 1 1 auto;
+      flex: 0 1 auto;
       min-width: 0;
       min-height: 0;
       padding: 0.125em;
     }
 
-    /* Put the status light centered below the image */
+    /* Status light sits to the left and keeps fixed size */
     .status-light {
-      margin: 0 auto;
+      /* keep the light a fixed size; spacing from the container is
+         handled by the parent's padding and justify-content */
+      margin: 0;
+      flex: 0 0 auto;
     }
 
     .warning {

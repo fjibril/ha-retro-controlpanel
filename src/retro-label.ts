@@ -31,7 +31,7 @@ class RetroLabel extends LitElement {
     .variant-etched {
       font-family: 'Courier Prime', monospace;
       font-weight: 700;
-      font-size: 0.875em;
+      font-size: clamp(0.75em, 2vw, 1.5em);
       letter-spacing: 0.0625em;
       color: #222; /* Dark ink fill */
       /* White shadow shifted down = light hitting the bottom edge of the groove */
@@ -45,7 +45,7 @@ class RetroLabel extends LitElement {
     .variant-plate {
       font-family: 'Courier Prime', monospace;
       font-weight: 700;
-      font-size: 0.75em;
+      font-size: clamp(0.75em, 2vw, 1.5em);
       letter-spacing: 0.0625em;
       color: #eee;
 
@@ -90,7 +90,7 @@ class RetroLabel extends LitElement {
     .variant-dymo {
       font-family: 'Oswald', sans-serif; /* Blocky embossed font */
       font-weight: 500;
-      font-size: 0.875em;
+      font-size: clamp(0.75em, 2vw, 1.2em);
       letter-spacing: 0.125em;
 
       /* Plastic Tape Color (Classic Black) */

@@ -159,7 +159,26 @@ export class SevenSegmentDisplay extends LitElement {
       <retro-label .label=${unit} variant="dymo"></retro-label>
     </div>
   `;
-    return ret;
+    const ret2 = html`
+<div class="device-container">
+  <div class="device-frame">
+
+    <!-- Content: Centered, but can push the height if needed -->
+    <div class="device-content">
+      <div class="digits">
+        ${map(range((stateStr as string).length), (i: number) =>
+          this.render7segmentDigit((stateStr as string)[i], i + 1 === dotIndex)
+        )}
+      </div>
+
+    </div>
+
+    <!-- Label: Anchored to the bottom bezel -->
+    <div class="bezel-label"><retro-label .label=${unit} variant="dymo"></retro-label></div>
+
+  </div>
+</div>`;
+    return ret2;
   }
 
   render7segmentDigit(value: string, withDot: boolean) {
@@ -233,7 +252,8 @@ export class SevenSegmentDisplay extends LitElement {
   }
 
   static styles = css`
-    .seven-segment-display {
+    seven-segment-display {
+      flex-grow: 1; /* This will make it take up all available space */
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -245,16 +265,14 @@ export class SevenSegmentDisplay extends LitElement {
       border-image: url(${unsafeCSS(ninePatch7SegBG)}) 32 fill stretch; /* adjust slice to your border width */
       background: #111;
       box-sizing: border-box;
-      gap: 0.375em;
+      gap: 1.2em;
     }
     .digits {
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 0.5em;
-      margin-right: 1.2em;
-      margin-bottom: 1em;
-      margin-top: 0.2em
+      margin: 0;
     }
 
     .digit {
@@ -264,16 +282,103 @@ export class SevenSegmentDisplay extends LitElement {
 
     .unit-label {
       font-family: 'Courier New', monospace;
-      font-size: 1em;
+      font-size: clamp(0.75em, 2vw, 1.5em);
       font-weight: bold;
       color: #ff6633;
       letter-spacing: 0.125em;
       text-align: center;
-      padding: 0 0.5em 0.5em 0.5em;
+      padding: 0;
     }
 
     .warning {
       --ha-label-badge-color: var(--label-badge-yellow);
     }
+
+
+
+
+/* 1. Context: Establishes the width for calculation */
+.device-container {
+  width: 100%;       /* Or fixed px, or whatever the parent provides */
+  max-width: 600px;  /* Optional cap */
+  container-type: inline-size; /* Enables 'cqi' units */
+  flex-grow: 1; /* This will make it take up all available space */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 2. The Frame: Hybrid Sizing */
+.device-frame {
+  /* A. LINEAR SCALING GEOMETRY */
+  /* We define dimensions in 'cqi' (Container Query Inline-Size).
+     100cqi = 100% of the container width. */
+
+  width: 100%;
+
+  /* The Aspect Ratio Lock (Min-Height) */
+  /* 233px / 404px = 0.5767 -> 57.67cqi */
+  min-height: 57.67cqi;
+
+  /* The Bezel Thickness (Calculated from image slices relative to width) */
+  /* Top: 35/404, Right: 75/404, Bottom: 85/404, Left: 50/404 */
+  border-style: solid;
+  border-width: 8.66cqi 18.56cqi 21.04cqi 12.38cqi;
+
+  /* 9-Patch Image Mapping */
+  border-image-source: url(${unsafeCSS(ninePatch7SegBG)});
+  border-image-slice: 35 75 85 50 fill; /* 'fill' draws the screen bg */
+  border-image-repeat: stretch;
+
+  /* B. LAYOUT & EXPANSION */
+  box-sizing: border-box; /* Includes border in the width calculation */
+  display: flex;          /* Enables centering */
+  flex-direction: column;
+  justify-content: center; /* Vertically centers small content */
+  align-items: center;     /* Horizontally centers content */
+
+  position: relative;      /* Anchor for label */
+}
+
+/* 3. The Content */
+.device-content {
+  /* Visuals */
+  color: #00ffcc;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+
+  /* Responsive Text */
+  font-size: 4cqi;
+  line-height: 1.2;
+
+  /* Important: Ensure it sits on top of the 'fill' background */
+  z-index: 2;
+
+}
+
+/* 4. The Label */
+.bezel-label {
+  position: absolute;
+  /* We place it into the bottom border area using negative offsets */
+  /* This must match the bottom border-width defined above */
+  bottom: -21.04cqi;
+  left: 0;
+  width: 100%;
+  height: 21.04cqi; /* Occupy full bottom bezel height */
+
+  /* Center the text inside the bezel strip */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Design */
+  font-family: sans-serif;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 5cqi;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
   `;
 }

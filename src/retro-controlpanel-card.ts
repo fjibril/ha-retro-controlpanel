@@ -50,6 +50,10 @@ static styles = css`
         min-height: 2em;
         box-sizing: border-box;
         text-align: center;
+        display: flex;
+        flex-direction: column;
+        height: 100%; /* Or a defined height for the container */
+        align-items: center; /* To horizontally center children */
     }
 
     .seven-segment-display {
