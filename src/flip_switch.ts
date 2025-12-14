@@ -106,7 +106,7 @@ export class FlipSwitch extends LitElement {
       align-items: center;
       justify-content: center;
       flex: 1 1 auto;  /* Take available space */
-      max-width: 70%;
+      max-width: 55%;
       max-height: 100%;
       box-sizing: border-box;
       padding: 0.125em;
@@ -121,22 +121,17 @@ export class FlipSwitch extends LitElement {
       object-fit: contain;  /* Maintain aspect ratio */
     }
 
-    /* Status light sits to the left and keeps fixed size */
-    .status-light {
-      /* keep the light a fixed size; spacing from the container is
-         handled by the parent's padding and justify-content */
-      margin: 0;
-      flex: 0 0 auto;
-    }
-
     .warning {
       --ha-label-badge-color: var(--label-badge-yellow);
     }
 
-    /* Warning/status light */
+  /* Warning/status light */
   .status-light {
-    width: 2em;
-    height: 2em;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    margin: 0;
+    flex: 0 0 auto;
+    max-width: 30%;
     border-radius: 50%;
     background: radial-gradient(circle at 30% 30%, #ff6b35, #cc3300);
     border: 0.125em solid var(--metal-dark);
