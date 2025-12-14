@@ -80,53 +80,45 @@ export class FlipSwitch extends LitElement {
 
 
   static styles = css`
+    :host {
+      width: 100%;
+      flex: 1 1 auto;  /* Fill available space */
+      display: flex;
+      box-sizing: border-box;
+      min-height: 0;  /* Allow shrinking */
+    }
+
     .flip-switch {
       display: flex;
-      /* place status light to the left of the switch and spread items evenly */
       flex-direction: row;
       align-items: center;
       justify-content: center;
       width: 100%;
-      /* give a little padding so the contents don't touch container bounds */
+      height: 100%;  /* Fill host element */
       padding: 0.5em;
-      /* allow the container to shrink if parent is smaller */
-      max-width: 100%;
       box-sizing: border-box;
-      overflow: hidden;
-      /* allow flex children to shrink */
-      flex: 0 1 auto;
-      /* allow shrinking in nested flex layouts */
-      min-width: 0;
-      min-height: 0;
       cursor: pointer;
       gap: 1em;
-    }
-
-    .flip-switch img {
-      /* Let the image scale down to fit the parent but never grow beyond its
-         intrinsic size. Keep aspect ratio. */
-      display: block;
-      width: auto;
-      height: auto;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      flex: 0 1 auto;
     }
 
     .image-wrap {
       display: flex;
       align-items: center;
       justify-content: center;
-      /* don't let the image area stretch to fill the whole row; allow it
-         to size to the intrinsic image while remaining responsive */
-      width: auto;
-      max-width: 65%;
+      flex: 1 1 auto;  /* Take available space */
+      max-width: 70%;
+      max-height: 100%;
       box-sizing: border-box;
-      flex: 0 1 auto;
-      min-width: 0;
-      min-height: 0;
       padding: 0.125em;
+    }
+
+    .flip-switch img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;  /* Maintain aspect ratio */
     }
 
     /* Status light sits to the left and keeps fixed size */

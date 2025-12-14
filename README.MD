@@ -1,11 +1,12 @@
 ## TODO
-- get font sizes right
--make the flip switch smaller
--make the 7-segment centered
+- ~~get font sizes right~~
+- make the flip switch smaller
+- make the 7-segment centered
+- make it adhere to ha card size changes
 - Collect README template
 - Make it listen to rows
--shave off the one pixel row above and below
--VU meter
--github actions
--hacs custom repo
--hacs
+- shave off the one pixel row above and below
+- VU meter
+- github actions
+- hacs custom repo
+- hacs

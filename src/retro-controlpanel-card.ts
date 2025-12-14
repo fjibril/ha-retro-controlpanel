@@ -17,13 +17,13 @@ import './push_button';
 @customElement('retro-controlpanel-card')
 class RetroControlpanelCard extends LitElement {
 
-    private config: RetroControlpanelCardConfig | undefined;
-    private _hass: HomeAssistant | undefined;
-    private model: { userName: string; entityId: string; stateStr: string; } | undefined;
+  private config: RetroControlpanelCardConfig | undefined;
+  private _hass: HomeAssistant | undefined;
+  private model: { userName: string; entityId: string; stateStr: string; } | undefined;
 
-    static mdiAlert = "M13,13H11V9H13M13,17H11V15H13M12,2A10,10 0 1,0 22,12A10,10 0 0,0 12,2Z";
+  static mdiAlert = "M13,13H11V9H13M13,17H11V15H13M12,2A10,10 0 1,0 22,12A10,10 0 0,0 12,2Z";
 
-static styles = css`
+  static styles = css`
     .card-container {
         border-image: url(${unsafeCSS(ninePatchCPBG)}) 50 fill stretch;
         border-width: 3.125em;
@@ -32,16 +32,23 @@ static styles = css`
     }
 
     .grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        display: flex;
+        flex-direction: column;
         gap: 0.5em;
+        height: 100%;  /* Fill available card space */
     }
 
     .grid-row {
-        display: contents; /* Makes children behave as direct grid items */
+        display: flex;
+        justify-content: center;  /* Center items when fewer than 3 */
+        gap: 0.5em;
+        flex: 1 1 auto;  /* Each row takes equal space */
+        min-height: 150px;
     }
 
     .grid-cell {
+        flex: 0 0 calc((100% - 1em) / 3);  /* Each cell is 1/3 width minus gap */
+        max-width: calc((100% - 1em) / 3);
         border-image: url(${unsafeCSS(ninePatchElementBG)}) 16 stretch;
         background-color: #929393;
         border-width: 1em;
@@ -52,8 +59,12 @@ static styles = css`
         text-align: center;
         display: flex;
         flex-direction: column;
-        height: 100%; /* Or a defined height for the container */
-        align-items: center; /* To horizontally center children */
+        align-items: center;
+        justify-content: flex-start;
+        padding: 0.5em;
+        gap: 0.5em;
+        container-type: inline-size;  /* Enable container queries for child elements */
+        /* Grid cells automatically get height from grid-auto-rows */
     }
 
     .seven-segment-display {
@@ -123,52 +134,52 @@ static styles = css`
   `;
 
 
-    // required
-    //TODO: Config type such as https://github.com/denysdovhan/vacuum-card/blob/353b4e183592344ba85a400f5def42e686f278e6/src/types.ts#L59
-    public setConfig(config: RetroControlpanelCardConfig): void {
-        if (!config.rows || !Array.isArray(config.rows)) {
-           throw new Error('You must define entities');
+  // required
+  //TODO: Config type such as https://github.com/denysdovhan/vacuum-card/blob/353b4e183592344ba85a400f5def42e686f278e6/src/types.ts#L59
+  public setConfig(config: RetroControlpanelCardConfig): void {
+    if (!config.rows || !Array.isArray(config.rows)) {
+      throw new Error('You must define entities');
+    }
+
+    // Normalize and validate entities
+    const normalizedEntityRows = config.rows.map((entityConfRow, rowIndex) => {
+      const normalizedEntities = entityConfRow.entities.map((entityConf, index) => {
+        // Create a shallow copy to avoid mutating possibly non-extensible input
+        const entity = (typeof entityConf === 'string')
+          ? { entity: entityConf, type: DisplayType.SevenSegment } as any
+          : { ...(entityConf as any) };
+
+        // Validate entity ID exists
+        if (!entity.entity) {
+          throw new Error(`Entity at row ${rowIndex} index ${index} must have an entity ID`);
         }
 
-        // Normalize and validate entities
-        const normalizedEntityRows = config.rows.map((entityConfRow, rowIndex) => {
-          const normalizedEntities = entityConfRow.entities.map((entityConf, index) => {
-            // Create a shallow copy to avoid mutating possibly non-extensible input
-            const entity = (typeof entityConf === 'string')
-              ? { entity: entityConf, type: DisplayType.SevenSegment } as any
-              : { ...(entityConf as any) };
+        // Validate type
+        if (!entity.type) {
+          throw new Error(`Entity ${entity.entity} must have a type`);
+        }
 
-            // Validate entity ID exists
-            if (!entity.entity) {
-              throw new Error(`Entity at row ${rowIndex} index ${index} must have an entity ID`);
-            }
+        if (!Object.values(DisplayType).includes(entity.type)) {
+          throw new Error(
+            `Invalid type "${entity.type}" for entity ${entity.entity}. ` +
+            `Must be one of: ${Object.values(DisplayType).join(', ')}`
+          );
+        }
 
-            // Validate type
-            if (!entity.type) {
-              throw new Error(`Entity ${entity.entity} must have a type`);
-            }
+        // Apply defaults for seven-segment configs without mutating original
+        if (entity.type === DisplayType.SevenSegment) {
+          const s = entity as SevenSegmentEntityConfig;
+          // Only set defaults if not already provided
+          s.num_digits = s.num_digits ?? 3;
+          s.maximum_fraction_digits = s.maximum_fraction_digits ?? 1;
+        }
 
-            if (!Object.values(DisplayType).includes(entity.type)) {
-              throw new Error(
-                `Invalid type "${entity.type}" for entity ${entity.entity}. ` +
-                `Must be one of: ${Object.values(DisplayType).join(', ')}`
-              );
-            }
-
-            // Apply defaults for seven-segment configs without mutating original
-            if (entity.type === DisplayType.SevenSegment) {
-              const s = entity as SevenSegmentEntityConfig;
-              // Only set defaults if not already provided
-              s.num_digits = s.num_digits ?? 3;
-              s.maximum_fraction_digits = s.maximum_fraction_digits ?? 1;
-            }
-
-            return entity as EntityConfig;
-          });
-          return { entities: normalizedEntities };
-        });
-        this.config = { ...config, rows: normalizedEntityRows };
-    }
+        return entity as EntityConfig;
+      });
+      return { entities: normalizedEntities };
+    });
+    this.config = { ...config, rows: normalizedEntityRows };
+  }
 
   public static async getConfigElement(): Promise<HTMLElement> {
     // TypeScript may not find the module's type declarations for the dynamic import.
@@ -182,40 +193,57 @@ static styles = css`
 
   public static getStubConfig(): Partial<RetroControlpanelCardConfig> {
     return {
-        entities: [{
-            entities: [
-                {
-                    entity: 'input_number.temperature1',
-                    type: DisplayType.SevenSegment,
-                },
-            ]
-        }],
-        title: "Control Panel"
+      entities: [{
+        entities: [
+          {
+            entity: 'input_number.temperature1',
+            type: DisplayType.SevenSegment,
+          },
+        ]
+      }],
+      title: "Control Panel"
     };
   }
 
-    set hass(hass: HomeAssistant) {
-        this._hass = hass;
-        this.requestUpdate();
-    }
+  // Card size for masonry view (1 unit = 50px)
+  public getCardSize(): number {
+    if (!this.config?.rows) return 3;
+    // Each row is approximately 3 units tall (150px), plus 2 for padding/border
+    return (this.config.rows.length * 3) + 2;
+  }
 
-    render() {
-        if (!this.config) return html``;
+  // Grid sizing for sections view
+  public getGridOptions() {
+    const rowCount = this.config?.rows?.length || 1;
+    return {
+      columns: 12,  // Full width
+      rows: rowCount * 3,  // 3 grid cells per data row
+      min_rows: 3,
+    };
+  }
 
-        const entityId = this.config.entity;
-        const state = this._hass?.states?.[entityId];
-        const stateStr = state ? state.state : 'unavailable';
+  set hass(hass: HomeAssistant) {
+    this._hass = hass;
+    this.requestUpdate();
+  }
 
-        const userName = this._hass?.user?.name ?? 'User';
+  render() {
+    if (!this.config) return html``;
 
-        this.model = {
-            userName: String(userName),
-            entityId: String(entityId),
-            stateStr: String(stateStr),
-        };
+    const entityId = this.config.entity;
+    const state = this._hass?.states?.[entityId];
+    const stateStr = state ? state.state : 'unavailable';
 
-        return template.call(this);
-    }
+    const userName = this._hass?.user?.name ?? 'User';
+
+    this.model = {
+      userName: String(userName),
+      entityId: String(entityId),
+      stateStr: String(stateStr),
+    };
+
+    return template.call(this);
+  }
 
 
 
@@ -238,7 +266,7 @@ static styles = css`
 //Register with HA for adding new cards
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
-    type: "retro-controlpanel-card",
-    name: "Retro Control Panel Card",
-    description: "Mechanical switches, buttons and seven segment displays."
+  type: "retro-controlpanel-card",
+  name: "Retro Control Panel Card",
+  description: "Mechanical switches, buttons and seven segment displays."
 });

@@ -13,19 +13,19 @@ export class SevenSegmentDisplay extends LitElement {
   @property({ type: Object }) private hass?: HomeAssistant;
 
   // Internal config storage
-   @property({ type: Object }) private config!: SevenSegmentEntityConfig;
+  @property({ type: Object }) private config!: SevenSegmentEntityConfig;
 
-    private static  digitMap: Record<string, string[]> = {
-    '0': ['a','b','c','d','e','f'],
-    '1': ['b','c'],
-    '2': ['a','b','g','e','d'],
-    '3': ['a','b','g','c','d'],
-    '4': ['f','g','b','c'],
-    '5': ['a','f','g','c','d'],
-    '6': ['a','f','g','e','c','d'],
-    '7': ['a','b','c'],
-    '8': ['a','b','c','d','e','f','g'],
-    '9': ['a','b','c','d','f','g'],
+  private static digitMap: Record<string, string[]> = {
+    '0': ['a', 'b', 'c', 'd', 'e', 'f'],
+    '1': ['b', 'c'],
+    '2': ['a', 'b', 'g', 'e', 'd'],
+    '3': ['a', 'b', 'g', 'c', 'd'],
+    '4': ['f', 'g', 'b', 'c'],
+    '5': ['a', 'f', 'g', 'c', 'd'],
+    '6': ['a', 'f', 'g', 'e', 'c', 'd'],
+    '7': ['a', 'b', 'c'],
+    '8': ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
+    '9': ['a', 'b', 'c', 'd', 'f', 'g'],
     '-': ['g'],
     ' ': [],
   };
@@ -153,8 +153,8 @@ export class SevenSegmentDisplay extends LitElement {
     <div class="seven-segment-display">
       <div class="digits">
         ${map(range((stateStr as string).length), (i: number) =>
-          this.render7segmentDigit((stateStr as string)[i], i + 1 === dotIndex)
-        )}
+      this.render7segmentDigit((stateStr as string)[i], i + 1 === dotIndex)
+    )}
       </div>
       <retro-label .label=${unit} variant="dymo"></retro-label>
     </div>
@@ -167,8 +167,8 @@ export class SevenSegmentDisplay extends LitElement {
     <div class="device-content">
       <div class="digits">
         ${map(range((stateStr as string).length), (i: number) =>
-          this.render7segmentDigit((stateStr as string)[i], i + 1 === dotIndex)
-        )}
+      this.render7segmentDigit((stateStr as string)[i], i + 1 === dotIndex)
+    )}
       </div>
 
     </div>
@@ -198,25 +198,25 @@ export class SevenSegmentDisplay extends LitElement {
         <!-- All 7 segments with their labels -->
         <g id="seven-segment-display">
           <!-- Segment A (top) -->
-          <use xlink:href="#h-seg" x="0" y="0" id="segment-a" class="segment-${this.onOff(value,'a')}"/>
+          <use xlink:href="#h-seg" x="0" y="0" id="segment-a" class="segment-${this.onOff(value, 'a')}"/>
 
           <!-- Segment B (top right) -->
-          <use xlink:href="#v-seg" x="-48" y="0" transform="scale(-1,1)" id="segment-b" class="segment-${this.onOff(value,'b')}"/>
+          <use xlink:href="#v-seg" x="-48" y="0" transform="scale(-1,1)" id="segment-b" class="segment-${this.onOff(value, 'b')}"/>
 
           <!-- Segment C (bottom right) -->
-          <use xlink:href="#v-seg" x="-48" y="-80" transform="scale(-1,-1)" id="segment-c" class="segment-${this.onOff(value,'c')}"/>
+          <use xlink:href="#v-seg" x="-48" y="-80" transform="scale(-1,-1)" id="segment-c" class="segment-${this.onOff(value, 'c')}"/>
 
           <!-- Segment D (bottom) -->
-          <use xlink:href="#h-seg" x="0" y="70" id="segment-d" class="segment-${this.onOff(value,'d')}"/>
+          <use xlink:href="#h-seg" x="0" y="70" id="segment-d" class="segment-${this.onOff(value, 'd')}"/>
 
           <!-- Segment E (bottom left) -->
-          <use xlink:href="#v-seg" x="0" y="-80" transform="scale(1,-1)" id="segment-e" class="segment-${this.onOff(value,'e')}"/>
+          <use xlink:href="#v-seg" x="0" y="-80" transform="scale(1,-1)" id="segment-e" class="segment-${this.onOff(value, 'e')}"/>
 
           <!-- Segment F (top left) -->
-          <use xlink:href="#v-seg" x="0" y="0" id="segment-f" class="segment-${this.onOff(value,'f')}"/>
+          <use xlink:href="#v-seg" x="0" y="0" id="segment-f" class="segment-${this.onOff(value, 'f')}"/>
 
           <!-- Segment G (middle) -->
-          <use xlink:href="#h-seg" x="0" y="35" id="segment-g" class="segment-${this.onOff(value,'g')}"/>
+          <use xlink:href="#h-seg" x="0" y="35" id="segment-g" class="segment-${this.onOff(value, 'g')}"/>
 
           <!-- Decimal point (optional) -->
           <circle cx="52" cy="75" r="5" id="decimal-point" class="segment-${withDot ? 'on' : 'off'}"/>
@@ -252,21 +252,15 @@ export class SevenSegmentDisplay extends LitElement {
   }
 
   static styles = css`
-    seven-segment-display {
-      flex-grow: 1; /* This will make it take up all available space */
+
+    :host {
+      width: 100%;
+      flex: 1 1 auto;  /* Fill available space */
       display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: auto;
-      width: fit-content;
-      border-width: 2em; /* adjust to match your image's border */
-      border-style: solid;
-      border-image: url(${unsafeCSS(ninePatch7SegBG)}) 32 fill stretch; /* adjust slice to your border width */
-      background: #111;
       box-sizing: border-box;
-      gap: 1.2em;
+      min-height: 0;  /* Allow shrinking */
     }
+
     .digits {
       display: flex;
       justify-content: center;
@@ -299,26 +293,21 @@ export class SevenSegmentDisplay extends LitElement {
 
 /* 1. Context: Establishes the width for calculation */
 .device-container {
-  width: 100%;       /* Or fixed px, or whatever the parent provides */
-  max-width: 600px;  /* Optional cap */
+  width: 100%;
+  height: 100%;  /* Fill host element */
   container-type: inline-size; /* Enables 'cqi' units */
-  flex-grow: 1; /* This will make it take up all available space */
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 
 /* 2. The Frame: Hybrid Sizing */
 .device-frame {
-  /* A. LINEAR SCALING GEOMETRY */
-  /* We define dimensions in 'cqi' (Container Query Inline-Size).
-     100cqi = 100% of the container width. */
-
   width: 100%;
-
-  /* The Aspect Ratio Lock (Min-Height) */
-  /* 233px / 404px = 0.5767 -> 57.67cqi */
-  min-height: 57.67cqi;
+  max-width: 100%;
+  aspect-ratio: 404 / 233;  /* Maintain original aspect ratio */
+  max-height: 100%;  /* Don't overflow container */
 
   /* The Bezel Thickness (Calculated from image slices relative to width) */
   /* Top: 35/404, Right: 75/404, Bottom: 85/404, Left: 50/404 */
@@ -338,6 +327,7 @@ export class SevenSegmentDisplay extends LitElement {
   align-items: center;     /* Horizontally centers content */
 
   position: relative;      /* Anchor for label */
+  container-type: inline-size; /* Enable container queries for children */
 }
 
 /* 3. The Content */
@@ -354,6 +344,12 @@ export class SevenSegmentDisplay extends LitElement {
   /* Important: Ensure it sits on top of the 'fill' background */
   z-index: 2;
 
+  /* Prevent overlap with border - scale content to fit inside border */
+  width: calc(100% - 10cqi);  /* Leave margin from left/right borders */
+  max-width: calc(100% - 10cqi);
+  padding: 2cqi;
+  box-sizing: border-box;
+  overflow: hidden;  /* Prevent any overflow */
 }
 
 /* 4. The Label */
@@ -361,22 +357,16 @@ export class SevenSegmentDisplay extends LitElement {
   position: absolute;
   /* We place it into the bottom border area using negative offsets */
   /* This must match the bottom border-width defined above */
-  bottom: -21.04cqi;
+  bottom: -25cqi;
   left: 0;
   width: 100%;
-  height: 21.04cqi; /* Occupy full bottom bezel height */
+  height: 21cqi; /* Occupy full bottom bezel height */
 
   /* Center the text inside the bezel strip */
   display: flex;
   align-items: center;
   justify-content: center;
 
-  /* Design */
-  font-family: sans-serif;
-  font-weight: bold;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 5cqi;
-  text-transform: uppercase;
   pointer-events: none;
 }
 

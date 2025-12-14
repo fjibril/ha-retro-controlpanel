@@ -89,86 +89,30 @@ export class PushButton extends LitElement {
   }
 
   static styles = css`
+    :host {
+      width: 100%;  /* Fill available width */
+      flex: 1 1 auto;  /* Fill available space */
+      display: flex;
+      box-sizing: border-box;
+      min-height: 0;  /* Allow shrinking */
+    }
+
     .push-button {
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      /* use only one third of available width and center */
-      width: 33.333%;
-      max-width: 33.333%;
-      margin: 0 auto;
-      /* allow the container to shrink if parent is smaller */
-      box-sizing: border-box;
-      overflow: hidden;
-      /* allow flex children to shrink */
-      flex: 0 1 auto;
-      /* allow shrinking in nested flex layouts */
-      min-width: 0;
-      min-height: 0;
-      cursor: pointer;
-    }
-
-    /* Frame using nine-patch background image for chrome */
-    .button-frame {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      justify-content: center;  /* Center button vertically in available space */
+      align-items: center;  /* Center button horizontally */
       width: 100%;
-      box-sizing: border-box;
-      flex: 1 1 auto;
-      min-width: 0;
-      min-height: 0;
-      padding: 0.25em;
-      border-width: 1em; /* slice width — roughly 16px equivalent */
-      border-style: solid;
-      border-image: url(${unsafeCSS(bgImg)}) 1em fill stretch;
-      background: transparent;
-    }
-
-    .button-face {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      box-sizing: border-box;
-      background: transparent;
-      padding: 0.25em;
-    }
-
-    .button-face.active .state-icon {
-      filter: brightness(1.15) drop-shadow(0 0 0.25em rgba(0,255,0,0.3));
-    }
-
-    .state-icon {
-      display: block;
-      width: auto;
-      height: auto;
-      object-fit: contain;
-      transition: transform 0.08s ease, filter 0.08s ease;
-    }
-
-    /* New styles for full 9-patch backed button */
-    .push-button {
-      /* keep same flex behavior as other elements */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      /* one third width and centered */
-      width: 50%;
-      max-width: 50%;
-      margin: 0 auto;
-      height: 7.5em; /* ~120px to match seven-seg and flip-switch */
+      height: 100%;  /* Fill host element */
+      margin: 0;
       box-sizing: border-box;
       cursor: pointer;
-      padding: 0.25em;
+      padding: 0.5em;
     }
 
     .button-bg {
-      width: 100%;
-      height: 100%;
+      width: 50%;  /* Button takes 50% of cell width */
+      aspect-ratio: 2 / 1;  /* Rectangular button - wider than tall */
       box-sizing: border-box;
       border-width: 0.5em;
       border-style: solid;
