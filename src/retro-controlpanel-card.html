@@ -11,6 +11,7 @@
                                 ['seven_segment', () => html`<seven-segment-display .config=${cellEntity} .hass=${this._hass}></seven-segment-display>`],
                                 ['flip_switch',  () => html`<flip-switch .config=${cellEntity} .hass=${this._hass}></flip-switch>`],
                                 ['button',  () => html`<push-button .config=${cellEntity} .hass=${this._hass}></push-button>`],
+                                ['vu_meter',  () => html`<vu-meter .config=${cellEntity} .hass=${this._hass}></vu-meter>`],
                                 ['error',   () => html`<span class="icon">❌</span> Error`],
                             ],
                             () =>  // Default case

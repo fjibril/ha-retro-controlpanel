@@ -7,6 +7,9 @@
 - ~~Make it listen to rows~~
 - shave off the one pixel row above and below
 - VU meter
+- click actions
+- externalize html
+- externalize css as in https://github.com/maxwroc/lovelace-card-boilerplate/blob/master/src/custom-element/my-custom-card.ts
 - github actions
 - hacs custom repo
 - hacs

@@ -150,6 +150,7 @@ export class RetroControlpanelCardEditor extends LitElement {
       seven_segment: 'Seven Segment Display',
       flip_switch: 'Flip Switch',
       indicator_button: 'Indicator Button',
+      vu_meter: 'VU Meter',
       button: 'Button',
     };
     return labels[type] || type;

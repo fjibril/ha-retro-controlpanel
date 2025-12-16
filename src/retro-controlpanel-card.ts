@@ -13,6 +13,7 @@ import { map } from 'lit/directives/map.js';
 import { range } from 'lit/directives/range.js';
 import './retro-label';
 import './push_button';
+import './vu-meter';
 
 @customElement('retro-controlpanel-card')
 class RetroControlpanelCard extends LitElement {
