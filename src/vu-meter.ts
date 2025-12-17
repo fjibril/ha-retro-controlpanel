@@ -1,17 +1,16 @@
-import { ActionHandlerEvent, handleAction, HomeAssistant } from 'custom-card-helpers';
-import { LitElement, html, css, nothing, TemplateResult } from 'lit';
+import { ActionHandlerEvent, handleAction, hasAction, HomeAssistant } from 'custom-card-helpers';
+import { html, css, nothing, TemplateResult } from 'lit';
 import { map } from "lit/directives/map.js";
 import { range } from "lit/directives/range.js";
 import { customElement, property } from 'lit/decorators.js';
 import { VUMeterEntityConfig } from './types';
+import { actionHandler } from './action-handler-directive';
+import { EntityBase } from './entity-base';
 
 @customElement('vu-meter')
-export class VUMeter extends LitElement {
-  // Public properties
-  @property({ type: Object }) private hass?: HomeAssistant;
-
+export class VUMeter extends EntityBase {
   // Internal config storage
-  @property({ type: Object }) private config!: VUMeterEntityConfig;
+  @property({ type: Object }) protected config!: VUMeterEntityConfig;
 
   private static readonly DEFAULT_MIN = 0;
   private static readonly DEFAULT_MAX = 100;
@@ -45,12 +44,6 @@ export class VUMeter extends LitElement {
       return 'yellow';
     } else {
       return 'red';
-    }
-  }
-
-  private _handleAction(ev: ActionHandlerEvent): void {
-    if (this.hass && this.config && ev.detail.action) {
-      handleAction(this, this.hass, this.config, ev.detail.action);
     }
   }
 
@@ -91,7 +84,10 @@ export class VUMeter extends LitElement {
 
     return html`
       <div class="vu-meter">
-        <div class="vu-meter-container">
+        <div class="vu-meter-container" .actionHandler=${actionHandler({
+                  hasHold: hasAction(this.config.hold_action),
+                  hasDoubleClick: hasAction(this.config.double_tap_action),
+                })}  @action=${this._handleAction}>
           <div class="vu-meter-bar">
             ${map(range(numSegments), (i: number) => {
               const segmentStartPercent = i * segmentWidth;

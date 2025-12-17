@@ -113,26 +113,6 @@ export class RetroControlpanelCardEditor extends LitElement {
           @input=${this._entityValueChanged}
         ></ha-textfield>
 
-        <!-- Icon (Optional) -->
-        <ha-icon-picker
-          label="Icon (Optional)"
-          .hass=${this.hass}
-          .value=${config.icon || ''}
-          .configValue=${'icon'}
-          .index=${index}
-          @value-changed=${this._entityValueChanged}
-        ></ha-icon-picker>
-
-        <!-- Show State Toggle -->
-        <ha-formfield label="Show State">
-          <ha-switch
-            .checked=${config.show_state !== false}
-            .configValue=${'show_state'}
-            .index=${index}
-            @change=${this._entitySwitchChanged}
-          ></ha-switch>
-        </ha-formfield>
-
         <!-- Delete Button -->
         <ha-icon-button
           .label=${'Delete Entity'}

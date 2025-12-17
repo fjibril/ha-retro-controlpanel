@@ -1,5 +1,5 @@
-import { HomeAssistant } from 'custom-card-helpers';
-import { LitElement, html, css, svg, nothing, TemplateResult, unsafeCSS } from 'lit';
+import { hasAction, HomeAssistant } from 'custom-card-helpers';
+import { html, css, svg, nothing, TemplateResult, unsafeCSS } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { map } from "lit/directives/map.js";
 import { range } from "lit/directives/range.js";
@@ -7,14 +7,13 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { EntityConfig } from './types';
 import onImg from './img/flipswitch_on.png';
 import offImg from './img/flipswitch_off.png';
+import { EntityBase } from './entity-base';
+import { actionHandler } from './action-handler-directive';
 
 @customElement('flip-switch')
-export class FlipSwitch extends LitElement {
-  // Public properties
-  @property({ type: Object }) private hass?: HomeAssistant;
-
+export class FlipSwitch extends EntityBase {
   // Internal config storage
-   @property({ type: Object }) private config!: EntityConfig;
+  @property({ type: Object }) protected config!: EntityConfig;
 
 
 
@@ -45,39 +44,23 @@ export class FlipSwitch extends LitElement {
       class="flip-switch"
       role="button"
       tabindex="0"
-      @click=${() => this._onToggleClick()}
-      @keydown=${(e: KeyboardEvent) => this._onKeyDown(e)}
       aria-pressed="${stateStr === 'on'}"
       title="Toggle ${entityId}"
     >
       <div class="status-light ${classMap({ inactive: stateStr !== 'on' })}"></div>
-      <div class="image-wrap"><img src="${stateStr === 'on' ? onImg : offImg}" alt="Flip Switch"></div>
+      <div class="image-wrap"
+      .actionHandler=${actionHandler({
+                        hasHold: hasAction(this.config.hold_action),
+                        hasDoubleClick: hasAction(this.config.double_tap_action),
+                      })}  @action=${this._handleAction}>
+      <img src="${stateStr === 'on' ? onImg : offImg}" alt="Flip Switch">
+      </div>
 
 
     </div>
   `;
     return ret;
   }
-
-  private async _onToggleClick(): Promise<void> {
-    if (!this.config || !this.hass) return;
-    const entityId = this.config.entity;
-    try {
-      await this.hass.callService('homeassistant', 'toggle', { entity_id: entityId });
-    } catch (err) {
-      // Log error; avoid throwing from UI code
-      // eslint-disable-next-line no-console
-      console.error('Failed to toggle entity', entityId, err);
-    }
-  }
-
-  private _onKeyDown(e: KeyboardEvent): void {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      void this._onToggleClick();
-    }
-  }
-
 
   static styles = css`
     :host {

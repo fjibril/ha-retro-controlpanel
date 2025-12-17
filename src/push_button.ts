@@ -1,19 +1,18 @@
-import { HomeAssistant } from 'custom-card-helpers';
-import { LitElement, html, css, nothing, TemplateResult, unsafeCSS } from 'lit';
+import { ActionHandlerEvent, handleAction, hasAction, HomeAssistant } from 'custom-card-helpers';
+import { html, css, nothing, TemplateResult, unsafeCSS } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { customElement, property } from 'lit/decorators.js';
-import { EntityConfig } from './types';
+import { PushButtonConfig } from './types';
 import onImg from './img/button_on.png';
 import offImg from './img/button_off.png';
 import bgImg from './img/btn_bg9.png';
+import { actionHandler } from './action-handler-directive';
+import { EntityBase } from './entity-base';
 
 @customElement('push-button')
-export class PushButton extends LitElement {
-  // Public properties
-  @property({ type: Object }) private hass?: HomeAssistant;
-
+export class PushButton extends EntityBase {
   // Internal config storage
-  @property({ type: Object }) private config!: EntityConfig;
+  @property({ type: Object }) protected config!: PushButtonConfig;
 
   render(): TemplateResult | typeof nothing {
     if (!this.config) {
@@ -47,8 +46,13 @@ export class PushButton extends LitElement {
       class="push-button"
       role="button"
       tabindex="0"
-      @click=${() => this._onButtonClick()}
-      @keydown=${(e: KeyboardEvent) => this._onKeyDown(e)}
+      .actionHandler=${actionHandler({
+                hasHold: hasAction(this.config.hold_action),
+                hasDoubleClick: hasAction(this.config.double_tap_action),
+              })}
+
+
+              @action=${this._handleAction}
       aria-pressed="${stateStr === 'on'}"
       title="Toggle ${entityId}"
       style="--btn-color: ${color};"
@@ -59,33 +63,6 @@ export class PushButton extends LitElement {
     </div>
   `;
     return ret;
-  }
-
-  private async _onButtonClick(): Promise<void> {
-    if (!this.config || !this.hass) return;
-      const entityId = this.config.entity;
-      const entityDomain = entityId.split('.')[0];
-      const action = entityDomain === 'input_button' || entityDomain === 'button' ? 'press' : 'toggle';
-      try {
-        if (entityDomain === 'input_button' || entityDomain === 'button') {
-            // Buttons are stateless and use the "press" service
-            await this.hass.callService(entityDomain, 'press', { entity_id: entityId });
-        } else {
-            // Booleans, switches, and lights use "toggle"
-            await this.hass.callService('homeassistant', 'toggle', { entity_id: entityId });
-        }
-    } catch (err) {
-      // Log error; avoid throwing from UI code
-      // eslint-disable-next-line no-console
-      console.error('Failed to toggle entity', entityId, err);
-    }
-  }
-
-  private _onKeyDown(e: KeyboardEvent): void {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      void this._onButtonClick();
-    }
   }
 
   static styles = css`

@@ -1,19 +1,23 @@
-import { HomeAssistant } from 'custom-card-helpers';
-import { LitElement, html, css, svg, nothing, TemplateResult, unsafeCSS } from 'lit';
+import {
+  HomeAssistant,
+  hasAction,
+  handleAction,
+  ActionHandlerEvent
+} from 'custom-card-helpers';
+import { actionHandler } from './action-handler-directive';
+import { html, css, svg, nothing, TemplateResult, unsafeCSS } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { map } from "lit/directives/map.js";
 import { range } from "lit/directives/range.js";
 import { customElement, property, state } from 'lit/decorators.js';
 import { EntityConfig, SevenSegmentEntityConfig } from './types';
 import ninePatch7SegBG from './img/val_bg.9.png';
+import { EntityBase } from './entity-base';
 
 @customElement('seven-segment-display')
-export class SevenSegmentDisplay extends LitElement {
-  // Public properties
-  @property({ type: Object }) private hass?: HomeAssistant;
-
+export class SevenSegmentDisplay extends EntityBase {
   // Internal config storage
-  @property({ type: Object }) private config!: SevenSegmentEntityConfig;
+  @property({ type: Object }) protected config!: SevenSegmentEntityConfig;
 
   private static digitMap: Record<string, string[]> = {
     '0': ['a', 'b', 'c', 'd', 'e', 'f'],
@@ -113,7 +117,6 @@ export class SevenSegmentDisplay extends LitElement {
     return fallback.slice(0, numDigits);
   }
 
-
   render(): TemplateResult | typeof nothing {
     if (!this.config) {
       return nothing;
@@ -149,36 +152,34 @@ export class SevenSegmentDisplay extends LitElement {
     // Get unit from config or state attributes (config takes precedence)
     const unit = this.config.unit || (state?.attributes?.unit_of_measurement as string | undefined);
 
-    const ret = html`
-    <div class="seven-segment-display">
-      <div class="digits">
-        ${map(range((stateStr as string).length), (i: number) =>
-      this.render7segmentDigit((stateStr as string)[i], i + 1 === dotIndex)
-    )}
-      </div>
-      <retro-label .label=${unit} variant="dymo"></retro-label>
-    </div>
-  `;
-    const ret2 = html`
-<div class="device-container">
-  <div class="device-frame">
+    return html`
+      <div class="device-container"
 
-    <!-- Content: Centered, but can push the height if needed -->
-    <div class="device-content">
-      <div class="digits">
-        ${map(range((stateStr as string).length), (i: number) =>
-      this.render7segmentDigit((stateStr as string)[i], i + 1 === dotIndex)
-    )}
-      </div>
+        .actionHandler=${actionHandler({
+          hasHold: hasAction(this.config.hold_action),
+          hasDoubleClick: hasAction(this.config.double_tap_action),
+        })}
 
-    </div>
 
-    <!-- Label: Anchored to the bottom bezel -->
-    <div class="bezel-label"><retro-label .label=${unit} variant="dymo"></retro-label></div>
+        @action=${this._handleAction}
+      >
+        <div class="device-frame">
 
-  </div>
-</div>`;
-    return ret2;
+          <!-- Content: Centered, but can push the height if needed -->
+          <div class="device-content">
+            <div class="digits">
+              ${map(range((stateStr as string).length), (i: number) =>
+            this.render7segmentDigit((stateStr as string)[i], i + 1 === dotIndex)
+          )}
+            </div>
+
+          </div>
+
+          <!-- Label: Anchored to the bottom bezel -->
+          <div class="bezel-label"><retro-label .label=${unit} variant="dymo"></retro-label></div>
+
+        </div>
+      </div>`;
   }
 
   render7segmentDigit(value: string, withDot: boolean) {

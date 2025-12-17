@@ -1,4 +1,5 @@
 import { ActionConfig, LovelaceCardConfig } from "custom-card-helpers";
+import { PushButton } from "./push_button";
 
 export enum DisplayType {
   SevenSegment = 'seven_segment',
@@ -13,11 +14,15 @@ export interface EntityConfig {
   entity: string;           // Required
   type: DisplayType;  // Required enum
   name?: string;            // Optional custom name
-  icon?: string;            // Optional custom icon
-  show_state?: boolean;     // Optional display toggle
-  color?: string;           // Optional color
-  tap_action?: ActionConfig; // Optional action
-  // Add any other per-entity options
+
+  // Standard action configuration
+  tap_action?: ActionConfig;
+  hold_action?: ActionConfig;
+  double_tap_action?: ActionConfig;
+}
+
+export interface PushButtonConfig extends EntityConfig {
+  color?: string;
 }
 
 export interface SevenSegmentEntityConfig extends EntityConfig {
