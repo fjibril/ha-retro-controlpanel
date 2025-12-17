@@ -79,7 +79,7 @@ export class SevenSegmentDisplay extends EntityBase {
         useGrouping: false,
       }).format(value);
 
-      if (formatted.length <= numDigits) {
+      if (lengthWithSubtractedDot(formatted) <= numDigits) {
         const padAmount = numDigits - formatted.length;
         if (padAmount > 0) {
           const padChar = useLeadingZeros ? '0' : ' ';
@@ -373,3 +373,8 @@ export class SevenSegmentDisplay extends EntityBase {
 
   `;
 }
+
+function lengthWithSubtractedDot(stringToCountLengthOf: string): number {
+  return stringToCountLengthOf.includes('.') ? stringToCountLengthOf.length - 1 : stringToCountLengthOf.length;
+}
+

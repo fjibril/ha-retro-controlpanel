@@ -10,6 +10,7 @@
 - click actions
 - externalize html
 - externalize css as in https://github.com/maxwroc/lovelace-card-boilerplate/blob/master/src/custom-element/my-custom-card.ts
+- formatting
 - github actions
 - hacs custom repo
 - hacs

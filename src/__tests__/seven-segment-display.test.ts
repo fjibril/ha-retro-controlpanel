@@ -65,25 +65,35 @@ describe('NumberFormatter', () => {
       expect(result).toBe('-003.142');
       expect(result.length).toBe(8);
     });
+
     it('should round up if at or above .5', () => {
       const result = sevenSegmentDisplay.formatWithPrioritySigDigits(100.5, 3, 0, true);
       expect(result).toBe('101');
       expect(result.length).toBe(3);
     });
+
     it('should round down if below .5', () => {
       const result = sevenSegmentDisplay.formatWithPrioritySigDigits(100.499999, 3, 0, true);
       expect(result).toBe('100');
       expect(result.length).toBe(3);
     });
+
     it('should round up if at or above .5 for negatives', () => {
       const result = sevenSegmentDisplay.formatWithPrioritySigDigits(-100.5, 4, 0, true);
       expect(result).toBe('-101');
       expect(result.length).toBe(4);
     });
+
     it('should round down if below .5 for negative numbers', () => {
       const result = sevenSegmentDisplay.formatWithPrioritySigDigits(-100.499999, 4, 0, true);
       expect(result).toBe('-100');
       expect(result.length).toBe(4);
+    });
+
+    it('should account for minus sign and dot', () => {
+      const result = sevenSegmentDisplay.formatWithPrioritySigDigits(-29.4, 4, 2, false);
+      expect(result).toBe('-29.4');
+      expect(result.length).toBe(5);
     });
   });
 
