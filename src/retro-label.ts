@@ -91,7 +91,7 @@ class RetroLabel extends LitElement {
     .variant-dymo {
       font-family: 'Oswald', sans-serif; /* Blocky embossed font */
       font-weight: 500;
-      font-size: clamp(0.6rem, 9cqi, 1.5rem);
+      font-size: clamp(0.2rem, 9cqi, 1.5rem);
       letter-spacing: 0.125em;
 
       /* Plastic Tape Color (Classic Black) */

@@ -96,19 +96,45 @@ export class VUMeter extends EntityBase {
               const isLit = percentage >= segmentEndPercent;
               const color = this.getSegmentColor(segmentMidPercent);
 
+              const isFirst = i === 0;
+              const isLast = i === numSegments - 1;
+              let visibilityClass = 'primary';
+
+              if (isFirst || isLast) {
+                visibilityClass = 'primary';
+              } else if (i % 2 !== 0) {
+                visibilityClass = 'secondary'; // 1, 3, 5...
+              } else {
+                visibilityClass = 'primary'; // 0, 2, 4...
+              }
+
               return html`
-                <div class="led ${color} ${isLit ? 'lit' : 'unlit'}"></div>
+                <div class="led ${color} ${isLit ? 'lit' : 'unlit'} ${visibilityClass}"></div>
               `;
             })}
           </div>
           <div class="vu-meter-scale">
             ${map(range(numSegments), (i: number) => {
               const segmentValue = min + ((max - min) * (i + 1) / numSegments);
-              const showLabel = i === 0 || i === numSegments - 1 || (i + 1) % 2 === 0;
+
+              const isFirst = i === 0;
+              const isLast = i === numSegments - 1;
+              const isPenultimate = i === numSegments - 2;
+              let visibilityClass = 'primary';
+
+              if (isFirst || isLast) {
+                visibilityClass = 'primary';
+              } else if (isPenultimate) {
+                visibilityClass = 'penultimate';
+              } else if (i % 2 !== 0) {
+                visibilityClass = 'secondary'; // 1, 3, 5...
+              } else if (i % 4 === 2) {
+                visibilityClass = 'tertiary'; // 2, 6, 10...
+              }
 
               return html`
-                <div class="scale-label">
-                  ${showLabel ? Math.round(segmentValue) : ''}
+                <div class="scale-label ${visibilityClass}">
+                  ${Math.round(segmentValue)}
                 </div>
               `;
             })}
@@ -136,9 +162,9 @@ export class VUMeter extends EntityBase {
       box-sizing: border-box;
       gap: 0.5em;
       justify-content: center;
-      /*background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);*/
       border: 0.125em solid var(--metal-dark, #1a1a1a);
       border-radius: 0.25em;
+      container-type: inline-size;
     }
 
     .vu-meter-container {
@@ -148,10 +174,8 @@ export class VUMeter extends EntityBase {
       justify-content: center;
       width: 100%;
       height: 100%;
-      /*background: #0a0a0a;*/
       border: 0.125em solid #000;
       border-radius: 0.25em;
-      /*box-shadow: inset 0 0.125em 0.25em rgba(0, 0, 0, 0.8);*/
       padding: 0.5em;
       gap: 0.125em;
       box-sizing: border-box;
@@ -181,6 +205,7 @@ export class VUMeter extends EntityBase {
       transition: all 0.15s ease-in-out;
       border: 0.0625em solid rgba(0, 0, 0, 0.8);
       box-sizing: border-box;
+      min-width: 0;
     }
 
     /* Unlit LEDs - very dim but visible */
@@ -252,13 +277,35 @@ export class VUMeter extends EntityBase {
 
     .scale-label {
       flex: 1 1 0;
-      text-align: center;
-      font-size: 0.6em;
+      display: flex;
+      justify-content: center;
+      white-space: nowrap;
+      font-size: clamp(0.2rem, 4cqi, 1rem);
       color: #ccc;
       font-family: 'Courier New', monospace;
       line-height: 1;
       min-height: 0.8em;
       box-sizing: border-box;
+      overflow: visible;
+      min-width: 0;
+    }
+
+    /* Default (Normal Mode) */
+    /* Labels: Hide secondary (odd indices) but keep space */
+    .scale-label.secondary {
+      visibility: hidden;
+    }
+    /* Labels: Always hide the penultimate value to avoid crowding near max */
+    .scale-label.penultimate {
+      visibility: hidden;
+    }
+    /* LEDs: Show all (default behavior) */
+
+    /* Wide Mode: Show everything */
+    @container (min-width: 210px) {
+      .scale-label.secondary {
+        visibility: visible;
+      }
     }
 
     .vu-meter-unit {
@@ -278,6 +325,40 @@ export class VUMeter extends EntityBase {
       font-family: 'Courier New', monospace;
       font-size: 0.9em;
       text-align: center;
+    }
+
+    /* Compact Mode */
+    @container (max-width: 140px) {
+      .vu-meter-container {
+        padding: 0.25em;
+      }
+
+      .vu-meter-bar {
+        gap: 0.1em;
+      }
+
+      .vu-meter-scale {
+        gap: 0.1em;
+      }
+
+      .led {
+        border-width: 0.04em;
+      }
+
+      /* LEDs: Hide secondary (odd indices) */
+      .led.secondary {
+        display: none;
+      }
+
+      /* Labels: Hide secondary (odd indices) to match LEDs */
+      .scale-label.secondary {
+        display: none;
+      }
+
+      /* Labels: Hide tertiary (indices 2, 6...) but keep space */
+      .scale-label.tertiary {
+        visibility: hidden;
+      }
     }
   `;
 }
