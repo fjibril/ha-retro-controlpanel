@@ -1,8 +1,8 @@
 import { ActionHandlerEvent, handleAction, hasAction, HomeAssistant } from 'custom-card-helpers';
-import { html, css, nothing, TemplateResult } from 'lit';
+import { html, css, nothing, TemplateResult, PropertyValues } from 'lit';
 import { map } from "lit/directives/map.js";
 import { range } from "lit/directives/range.js";
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { VUMeterEntityConfig } from './types';
 import { actionHandler } from './action-handler-directive';
 import { EntityBase } from './entity-base';
@@ -11,6 +11,13 @@ import { EntityBase } from './entity-base';
 export class VUMeter extends EntityBase {
   // Internal config storage
   @property({ type: Object }) protected config!: VUMeterEntityConfig;
+
+  @state() private hideAlternatingScaleLabels = false;
+  @state() private hideBigPrimaryScaleLabels = false;
+
+  @query('.vu-meter-scale') private scaleEl?: HTMLDivElement;
+
+  private resizeObserver?: ResizeObserver;
 
   private static readonly DEFAULT_MIN = 0;
   private static readonly DEFAULT_MAX = 100;
@@ -47,6 +54,99 @@ export class VUMeter extends EntityBase {
     }
   }
 
+  protected firstUpdated(changedProperties: PropertyValues): void {
+    super.firstUpdated(changedProperties);
+    this.observeScaleWidth();
+  }
+
+  protected updated(changedProperties: PropertyValues): void {
+    super.updated(changedProperties);
+    this.handleLabelOverlap();
+  }
+
+  disconnectedCallback(): void {
+    this.resizeObserver?.disconnect();
+    super.disconnectedCallback();
+  }
+
+  private observeScaleWidth(): void {
+    if (!this.scaleEl) {
+      return;
+    }
+
+    if (!this.resizeObserver) {
+      this.resizeObserver = new ResizeObserver(() => this.handleLabelOverlap());
+    }
+
+    this.resizeObserver.observe(this.scaleEl);
+    this.handleLabelOverlap();
+  }
+
+  private handleLabelOverlap(): void {
+    const scaleEl = this.scaleEl;
+    if (!scaleEl) {
+      return;
+    }
+    const allLabels = Array.from(scaleEl.querySelectorAll('.scale-label')) as HTMLElement[];
+    const hasOverlap = this.detectLabelOverlap(allLabels);
+    if (hasOverlap !== this.hideAlternatingScaleLabels) {
+      this.hideAlternatingScaleLabels = hasOverlap;
+      const oddLabels = Array.from(scaleEl.querySelectorAll('.scale-label.secondary')) as HTMLElement[];
+      if (hasOverlap) {
+        hideLabels(oddLabels);
+      } else {
+        unhideLabels(allLabels);
+      }
+    }
+
+    if (hasOverlap) {
+      const primaryLabels = Array.from(scaleEl.querySelectorAll('.scale-label.primary')) as HTMLElement[];
+      const hasPrimaryOverlap = this.detectLabelOverlap(primaryLabels);
+
+      if (hasPrimaryOverlap !== this.hideBigPrimaryScaleLabels) {
+        this.hideBigPrimaryScaleLabels = hasPrimaryOverlap;
+      const tertiaryLabels = Array.from(scaleEl.querySelectorAll('.scale-label.tertiary')) as HTMLElement[];
+        if (hasPrimaryOverlap) {
+          hideLabels(tertiaryLabels);
+        } else {
+          unhideLabels(tertiaryLabels);
+        }
+      }
+    }
+
+    function hideLabels(labels: HTMLElement[]) {
+      for (const label of labels) {
+        label.classList.add('auto-hidden');
+      }
+    }
+
+    function unhideLabels(labels: HTMLElement[]) {
+      for (const label of labels) {
+          if (label.classList.contains('auto-hidden')) {
+            label.classList.remove('auto-hidden');
+          }
+        }
+    }
+  }
+
+  private detectLabelOverlap(labels: HTMLElement[]): boolean {
+    if (labels.length === 0) {
+      return false;
+    }
+
+    const minGapPx = 1;
+    let hasOverlap = false;
+    for (let i = 1; i < labels.length; i += 1) {
+      const prevRect = labels[i - 1].getBoundingClientRect();
+      const rect = labels[i].getBoundingClientRect();
+      if (rect.left - prevRect.right < minGapPx) {
+        hasOverlap = true;
+        break;
+      }
+    }
+    return hasOverlap;
+  }
+
   render(): TemplateResult | typeof nothing {
     if (!this.config) {
       return nothing;
@@ -78,10 +178,6 @@ export class VUMeter extends EntityBase {
     const min = this.config.min ?? VUMeter.DEFAULT_MIN;
     const max = this.config.max ?? VUMeter.DEFAULT_MAX;
 
-    // Get unit from config or state attributes (config takes precedence)
-    const unit = this.config.unit || (state?.attributes?.unit_of_measurement as string | undefined);
-    const label = this.config.name || state.attributes.friendly_name || entityId;
-
     return html`
       <div class="vu-meter">
         <div class="vu-meter-container" .actionHandler=${actionHandler({
@@ -91,21 +187,16 @@ export class VUMeter extends EntityBase {
           <div class="vu-meter-bar">
             ${map(range(numSegments), (i: number) => {
               const segmentStartPercent = i * segmentWidth;
-              const segmentEndPercent = (i + 1) * segmentWidth;
-              const segmentMidPercent = (segmentStartPercent + segmentEndPercent) / 2;
-              const isLit = percentage >= segmentEndPercent;
-              const color = this.getSegmentColor(segmentMidPercent);
+              const divisor = Math.max(1, numSegments - 1);
+              const segmentValue = min + ((max - min) * i / divisor);
+              // Light from the very first step (min) onward
+              const isLit = rawValue >= segmentValue;
+              const color = this.getSegmentColor(segmentValue);
 
-              const isFirst = i === 0;
-              const isLast = i === numSegments - 1;
-              let visibilityClass = 'primary';
+              let visibilityClass = 'primary'; // 0, 2, 4...
 
-              if (isFirst || isLast) {
-                visibilityClass = 'primary';
-              } else if (i % 2 !== 0) {
+              if (i % 2 !== 0) {
                 visibilityClass = 'secondary'; // 1, 3, 5...
-              } else {
-                visibilityClass = 'primary'; // 0, 2, 4...
               }
 
               return html`
@@ -115,25 +206,21 @@ export class VUMeter extends EntityBase {
           </div>
           <div class="vu-meter-scale">
             ${map(range(numSegments), (i: number) => {
-              const segmentValue = min + ((max - min) * (i + 1) / numSegments);
+              const divisor = Math.max(1, numSegments - 1);
+              const segmentValue = min + ((max - min) * i / divisor);
 
-              const isFirst = i === 0;
-              const isLast = i === numSegments - 1;
-              const isPenultimate = i === numSegments - 2;
-              let visibilityClass = 'primary';
+              let autoHidden = false;
+              let visibilityClasses = ['primary'];
 
-              if (isFirst || isLast) {
-                visibilityClass = 'primary';
-              } else if (isPenultimate) {
-                visibilityClass = 'penultimate';
-              } else if (i % 2 !== 0) {
-                visibilityClass = 'secondary'; // 1, 3, 5...
+              if (i % 2 !== 0) {
+                visibilityClasses = ['secondary']; // 1, 3, 5...
+                autoHidden = true;
               } else if (i % 4 === 2) {
-                visibilityClass = 'tertiary'; // 2, 6, 10...
+                visibilityClasses.push('tertiary'); // 2, 6, 10...
               }
 
               return html`
-                <div class="scale-label ${visibilityClass}">
+                <div class="scale-label ${visibilityClasses.join(' ')} ${autoHidden ? 'auto-hidden' : ''}">
                   ${Math.round(segmentValue)}
                 </div>
               `;
@@ -214,17 +301,17 @@ export class VUMeter extends EntityBase {
     }
 
     .led.unlit.green {
-      background: radial-gradient(circle at 30% 30%, #1a3a1a, #0a1a0a);
+      background: radial-gradient(circle at 30% 30%, #349e34ff, #04ff04ff);
       box-shadow: inset 0 0.0625em 0.0625em rgba(0, 0, 0, 0.8);
     }
 
     .led.unlit.yellow {
-      background: radial-gradient(circle at 30% 30%, #3a3a1a, #1a1a0a);
+      background: radial-gradient(circle at 30% 30%, #bbbb3aff, #ffff00ff);
       box-shadow: inset 0 0.0625em 0.0625em rgba(0, 0, 0, 0.8);
     }
 
     .led.unlit.red {
-      background: radial-gradient(circle at 30% 30%, #3a1a1a, #1a0a0a);
+      background: radial-gradient(circle at 30% 30%, #c61a1a, #ff0000);
       box-shadow: inset 0 0.0625em 0.0625em rgba(0, 0, 0, 0.8);
     }
 
@@ -290,15 +377,11 @@ export class VUMeter extends EntityBase {
       min-width: 0;
     }
 
+
     /* Default (Normal Mode) */
     /* Labels: Hide secondary (odd indices) but keep space */
-    .scale-label.secondary {
-      visibility: hidden;
-    }
-    /* Labels: Always hide the penultimate value to avoid crowding near max */
-    .scale-label.penultimate {
-      visibility: hidden;
-    }
+
+
     /* LEDs: Show all (default behavior) */
 
     /* Wide Mode: Show everything */
@@ -357,8 +440,12 @@ export class VUMeter extends EntityBase {
 
       /* Labels: Hide tertiary (indices 2, 6...) but keep space */
       .scale-label.tertiary {
-        visibility: hidden;
+        visibility: visible;
       }
+    }
+
+    .scale-label.auto-hidden {
+      visibility: hidden;
     }
   `;
 }

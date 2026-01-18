@@ -1,6 +1,22 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+const FONT_LINK_ID = 'retro-label-fonts';
+const FONT_URL =
+  'https://fonts.googleapis.com/css2?family=Courier+Prime:wght@700&family=Oswald:wght@500&display=swap';
+
+const ensureFontStylesheet = (): void => {
+  if (document.getElementById(FONT_LINK_ID)) {
+    return;
+  }
+
+  const link = document.createElement('link');
+  link.id = FONT_LINK_ID;
+  link.rel = 'stylesheet';
+  link.href = FONT_URL;
+  document.head.append(link);
+};
+
 // Variants: 'etched' | 'plate' | 'dymo'
 export type LabelVariant = 'etched' | 'plate' | 'dymo';
 
@@ -12,8 +28,6 @@ class RetroLabel extends LitElement {
   @property({ type: String }) variant: LabelVariant = 'plate';
 
   static styles = css`
-    @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@700&family=Oswald:wght@500&display=swap');
-
     :host {
       display: inline-block;
       vertical-align: middle;
@@ -111,6 +125,11 @@ class RetroLabel extends LitElement {
       transform: rotate(-0.5deg);
     }
   `;
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    ensureFontStylesheet();
+  }
 
   render() {
     let displayText = '---';

@@ -5,6 +5,7 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import terser from "@rollup/plugin-terser";
 import typescript from "@rollup/plugin-typescript";
 import serve from "rollup-plugin-serve";
+import livereload from "rollup-plugin-livereload";
 //import ignore from "./rollup-plugins/rollup-ignore-plugin.js";
 import image from '@rollup/plugin-image';
 import { createFilter } from '@rollup/pluginutils';
@@ -21,6 +22,9 @@ const IGNORED_FILES = [
 ];
 */
 const dev = process.env.ROLLUP_WATCH === 'true';
+const live = process.env.LIVERELOAD === 'true';
+const liveHost = process.env.LIVERELOAD_HOST || 'localhost';
+const livePort = Number(process.env.LIVERELOAD_PORT || 35729);
 const production = !dev;
 
 const serveOptions = {
@@ -62,7 +66,10 @@ const plugins = [
 
   json(),
   commonjs(),
-  ...(dev ? [serve(serveOptions)] : [terser()]),
+  ...(dev ? [
+    serve(serveOptions),
+    ...(live ? [livereload({ watch: 'dist', delay: 200, host: liveHost, port: livePort })] : []),
+  ] : [terser()]),
 ];
 
 // Exclude test files from the bundle

@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "rollup -c --watch --bundleConfigAsCjs",
+    "start": "rollup -c --watch --bundleConfigAsCjs --environment LIVERELOAD:true,LIVERELOAD_HOST:0.0.0.0,LIVERELOAD_PORT:35729",
     "build": "rollup -c --bundleConfigAsCjs",
     "format": "prettier --write .",
     "start:hass-stable": "docker run --rm -p8123:8123 -v ./.hass_dev:/config homeassistant/home-assistant:stable",
@@ -49,6 +49,7 @@
     "jsdom": "^27.2.0",
     "prettier": "^3.6.2",
     "rollup": "^4.50.1",
+    "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-serve": "^1.1.1",
     "typescript": "^5.9.2",
     "vitest": "^4.0.14"

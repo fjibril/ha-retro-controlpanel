@@ -1,28 +1,32 @@
-<ha-card header="Hello ${this.model.userName}!">
+<ha-card>
     <div class="card-content card-container">
+        <div class="title-container">
+            <retro-label .label=${this.config.title} .hass="${this._hass}" variant="plate"></retro-label>
+        </div>
         <div class="grid">
-            ${repeat(this.config.rows, (row, rowIndex) => rowIndex, (row, rowIndex) => html`
-                <div class="grid-row">
-                ${repeat(row.entities, (cellEntity, cellIndex) => cellIndex, (cellEntity) => html`
-                    <div class="grid-cell">
-                        <retro-label .entity=${cellEntity.entity} .hass="${this._hass}" variant="dymo"></retro-label>
-                        ${choose(cellEntity.type,
-                            [
-                                ['seven_segment', () => html`<seven-segment-display .config=${cellEntity} .hass=${this._hass}></seven-segment-display>`],
-                                ['flip_switch',  () => html`<flip-switch .config=${cellEntity} .hass=${this._hass}></flip-switch>`],
-                                ['button',  () => html`<push-button .config=${cellEntity} .hass=${this._hass}></push-button>`],
-                                ['vu_meter',  () => html`<vu-meter .config=${cellEntity} .hass=${this._hass}></vu-meter>`],
-                                ['error',   () => html`<span class="icon">❌</span> Error`],
-                            ],
-                            () =>  // Default case
-                                html`${cellEntity}
-                                <p>The ${this.model.entityId} is ${this.model.stateStr}.</p>
-                                <pre>${JSON.stringify(cellEntity, null, 2)}</pre>`
-                        )}
 
-                    </div>
-                `)}
+            ${repeat(this.config.rows, (row, rowIndex) => rowIndex, (row, rowIndex) => html`
+            <div class="grid-row">
+                ${repeat(row.entities, (cellEntity, cellIndex) => cellIndex, (cellEntity) => html`
+                <div class="grid-cell">
+                    <retro-label .entity=${cellEntity.entity} .hass="${this._hass}" variant="dymo"></retro-label>
+                    ${choose(cellEntity.type,
+                    [
+                    ['seven_segment', () => html`<seven-segment-display .config=${cellEntity}
+                        .hass=${this._hass}></seven-segment-display>`],
+                    ['flip_switch', () => html`<flip-switch .config=${cellEntity} .hass=${this._hass}></flip-switch>`],
+                    ['button', () => html`<push-button .config=${cellEntity} .hass=${this._hass}></push-button>`],
+                    ['vu_meter', () => html`<vu-meter .config=${cellEntity} .hass=${this._hass}></vu-meter>`],
+                    ['error', () => html`<span class="icon">❌</span> Error`],
+                    ],
+                    () => // Default case
+                    html`
+                    <p>Unknown type.</p>
+                    `)}
+
                 </div>
+                `)}
+            </div>
             `)}
         </div>
     </div>

@@ -20,7 +20,6 @@ class RetroControlpanelCard extends LitElement {
 
   private config: RetroControlpanelCardConfig | undefined;
   private _hass: HomeAssistant | undefined;
-  private model: { userName: string; entityId: string; stateStr: string; } | undefined;
 
   static mdiAlert = "M13,13H11V9H13M13,17H11V15H13M12,2A10,10 0 1,0 22,12A10,10 0 0,0 12,2Z";
 
@@ -30,6 +29,11 @@ class RetroControlpanelCard extends LitElement {
         border-width: 3.125em;
         border-style: solid;
         padding: 1em;
+    }
+
+    .title-container {
+      text-align: center;
+      padding-bottom: 10px;
     }
 
     .grid {
@@ -135,8 +139,6 @@ class RetroControlpanelCard extends LitElement {
   `;
 
 
-  // required
-  //TODO: Config type such as https://github.com/denysdovhan/vacuum-card/blob/353b4e183592344ba85a400f5def42e686f278e6/src/types.ts#L59
   public setConfig(config: RetroControlpanelCardConfig): void {
     if (!config.rows || !Array.isArray(config.rows)) {
       throw new Error('You must define entities');
@@ -219,7 +221,7 @@ class RetroControlpanelCard extends LitElement {
     return {
       columns: 12,  // Full width
       rows: rowCount * 3,  // 3 grid cells per data row
-      min_rows: 3,
+      min_rows: 2,
     };
   }
 
@@ -236,12 +238,6 @@ class RetroControlpanelCard extends LitElement {
     const stateStr = state ? state.state : 'unavailable';
 
     const userName = this._hass?.user?.name ?? 'User';
-
-    this.model = {
-      userName: String(userName),
-      entityId: String(entityId),
-      stateStr: String(stateStr),
-    };
 
     return template.call(this);
   }
