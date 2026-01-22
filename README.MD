@@ -29,8 +29,7 @@ A Home Assistant Lovelace card that brings the aesthetic of vintage cockpits, an
 ### Screenshots
 | Main Interface |
 | :--- |
-| ![Retro Control Panel Placeholder](https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/retro-control-panel/docs/screenshot.png) |
-*(Add a screenshot to your repo and update this link to see it here)*
+| ![Retro Control Panel](https://raw.githubusercontent.com/fjibril/ha-retro-controlpanel/docs/screenshot.png) |
 
 ---
 
@@ -38,25 +37,19 @@ A Home Assistant Lovelace card that brings the aesthetic of vintage cockpits, an
 
 #### HACS (Recommended)
 1. Open **HACS** in Home Assistant.
-2. Go to **Frontend**.
-3. Click the **three dots** in the top right and select **Custom repositories**.
-4. Repository: `https://github.com/YOUR_GITHUB_USERNAME/retro-control-panel`
-5. Category: `Lovelace`
+2. Click the **three dots** in the top right and select **Custom repositories**.
+4. Repository: `https://github.com/fjibril/ha-retro-controlpanel`
+5. Category: `Dashboard`
 6. Click **Add** and then **Install**.
 
 #### Manual
-1. Download `retro-controlpanel-card.js` from the [latest release](https://github.com/YOUR_GITHUB_USERNAME/retro-control-panel/releases).
+1. Download `retro-controlpanel-card.js` from the [latest release](https://github.com/fjibril/ha-retro-controlpanel/releases).
 2. Copy the file to `www/community/retro-control-panel/`.
 3. Add the following to your resources:
    ```yaml
    url: /local/community/retro-control-panel/retro-controlpanel-card.js
    type: JavaScript module
 
-
-### Screenshots
-| Main Interface |
-| :--- |
-| ![Retro Control Panel Placeholder](https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/retro-control-panel/main/screenshot.png) |
 
 ---
 
@@ -73,22 +66,21 @@ A Home Assistant Lovelace card that brings the aesthetic of vintage cockpits, an
 | Option | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | entity | string | Required | The entity ID (input_number, input_boolean, etc). |
-| type | string | Required | seven_segment, vu_meter, flip_switch, or button. |
-| num_digits | number | 4 | Used for seven_segment. Total digits to display. |
-| leading_zeros | boolean | false | Used for seven_segment. |
-| maximum_fraction_digits | number | 0 | Used for seven_segment. Decimal precision. |
-| min / max | number | 0/100 | Used for vu_meter. Defines the analog scale. |
-| green_threshold | number | | Threshold for the green zone. |
-| yellow_threshold | number | | Threshold for the yellow zone. |
-| segments | number | 10 | Used for vu_meter. Number of LED segments. |
-| unit | string | | Suffix label for the VU meter (e.g., "Birnen"). |
+| type | string | Required | One of `seven_segment`, `vu_meter`, `flip_switch`, or `button`. |
+| num_digits | number | 4 | Used for `seven_segment`. Total digits to display. |
+| leading_zeros | boolean | false | Used for `seven_segment` to fill `num_digits` with leading zeroes. |
+| maximum_fraction_digits | number | 0 | Used for `seven_segment`. Decimal precision. |
+| min / max | number | 0/100 | Used for `vu_meter`. Defines the analog scale. |
+| green_threshold | number | | Threshold for the green zone. Everything below will display green LEDs. |
+| yellow_threshold | number | | Threshold for the yellow zone. Everything below that is not green will display yellow LEDs. Anything above will display red LEDs.|
+| segments | number | 10 | Used for `vu_meter`. Number of LED segments. |
 
 ---
 
 ### Example Usage
-
+```yaml
 type: custom:retro-controlpanel-card
-title: Control Panel
+title: My Retro Control Panel
 rows:
   - entities:
       - entity: input_number.my_temperature_1
@@ -103,7 +95,6 @@ rows:
         green_threshold: 70
         yellow_threshold: 40
         segments: 10
-        unit: Birnen
       - entity: input_boolean.my_toggle
         type: flip_switch
   - entities:
@@ -118,17 +109,4 @@ rows:
   - entities:
       - entity: script.new_script
         type: button
-
-
----
-
-### hacs.json
-Place this file in the **root** of your repository so HACS knows how to handle the plugin.
-
-```json
-{
-  "name": "Retro Control Panel",
-  "render_readme": true,
-  "type": "plugin",
-  "filename": "retro-controlpanel-card.js"
-}
+```
