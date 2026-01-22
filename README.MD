@@ -29,7 +29,7 @@ A Home Assistant Lovelace card that brings the aesthetic of vintage cockpits, an
 ### Screenshots
 | Main Interface |
 | :--- |
-| ![Retro Control Panel](https://raw.githubusercontent.com/fjibril/ha-retro-controlpanel/docs/screenshot.png) |
+| ![Retro Control Panel](https://raw.githubusercontent.com/fjibril/ha-retro-controlpanel/main/docs/screenshot.png) |
 
 ---
 
